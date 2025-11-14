@@ -1,3 +1,4 @@
+/*
 #include <Arduino.h>
 #include <BluetoothSerial.h>
 #include <DHT.h>
@@ -9,7 +10,7 @@
 BluetoothSerial BT;
 DHT dht(DHTPIN, DHTTYPE);
 
-uint8_t enderecoSlave[] = {0x1C, 0x69, 0x20, 0x92, 0x2D, 0x52};
+uint8_t enderecoSlave[] = {0xC0, 0x49, 0xEF, 0xBC, 0x02, 0x66};
 
 unsigned long ultimoEnvio = 0;
 const unsigned long intervaloEnvio = 2000;
@@ -71,3 +72,52 @@ void loop() {
     Serial.println(jsonString);
   }
 }
+*/
+
+#include <Arduino.h>
+#include <BluetoothSerial.h>
+#include <ArduinoJson.h>
+#include "DHT.h"
+int valorGas;
+JsonDocument doc;
+BluetoothSerial SerialBT;
+uint8_t BT[] = {0xC0, 0x49, 0xEF, 0xBC, 0x02, 0x66};
+
+void setup() {
+  Serial.begin(9600);
+    pinMode(27, OUTPUT);
+
+  if(SerialBT.begin("Esp-Recebo", true)){
+    Serial.println("Deu certo");
+  }
+  
+  else{
+    Serial.println("Deu errado");
+  }
+
+   if(SerialBT.connect(BT)){
+    Serial.println("Conectado");
+    digitalWrite(2, HIGH);
+   }
+  else{
+    Serial.println("Nao conectado");
+  }
+ }
+  String mensagemEnviada;
+
+void loop() {
+  delay(2000);
+  valorGas = analogRead(27);
+  doc["gas"] = valorGas;
+  serializeJson(doc,mensagemEnviada);
+  SerialBT.print(mensagemEnviada);
+  Serial.println(mensagemEnviada);
+}
+
+
+
+
+
+
+
+
